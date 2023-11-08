@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import psutil
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -26,7 +27,15 @@ class Helper():
                 today -= timedelta(days=1)
         return today.strftime('%Y/%m/%d')
 
+    # Check if Amibroker is opened
+    @staticmethod
+    def is_amibroker_opened():
+        for process in psutil.process_iter():
+            if process.name() == "Broker.exe":
+                return True
+        return False
+
     
 # For testing purposes only
 if __name__ == "__main__":
-    print(Helper.get_last_working_day())
+    print(Helper.is_amibroker_opened())
