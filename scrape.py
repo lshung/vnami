@@ -1,6 +1,7 @@
 from helper import Helper
 from stock_price import StockPrice
 from company_info import CompanyInfo
+from csv_model import StockPriceCsvModel
 
 
 class StockPriceScraper():
@@ -13,8 +14,10 @@ class StockPriceScraper():
         tasks = [(StockPrice.get_ohlcv_data, (symbol, )) for symbol in symbol_list]
         result = Helper.execute_thread_pool(tasks)
         result = [x for x in result if x is not None] # Remove items that are None
+        
+        # Save data to CSV files
         for df in result:
-            print(df)
+            StockPriceCsvModel.save_stock_data_to_csv(df)
 
 
 # For testing purposes only
