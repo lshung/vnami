@@ -23,7 +23,7 @@ class StockPriceCsvModel():
     
     # Get list of stock that are need to be updated (not in database or not updated till the last working day)
     @classmethod
-    def get_stocks_to_be_scraped(cls, full_symbol_list):
+    def get_symbols_to_be_scraped(cls, full_symbol_list):
         # Get symbols not exist in the database
         symbols_exist = [os.path.splitext(file)[0] for file in os.listdir(cls.database_folder)]
         symbols_not_exist = [symbol for symbol in full_symbol_list if symbol not in symbols_exist]
@@ -42,9 +42,9 @@ class StockPriceCsvModel():
                     symbols_exist_but_not_updated.append(os.path.splitext(filename)[0])
         
         # Concat 2 lists and remove duplicates
-        stocks_to_be_scraped = list(set(symbols_not_exist + symbols_exist_but_not_updated))
-        stocks_to_be_scraped.sort()
-        return stocks_to_be_scraped
+        symbols_to_be_scraped = list(set(symbols_not_exist + symbols_exist_but_not_updated))
+        symbols_to_be_scraped.sort()
+        return symbols_to_be_scraped
     
 
 # For testing purposes only
