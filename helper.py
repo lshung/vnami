@@ -1,5 +1,8 @@
-from datetime import datetime, timedelta
+import os
+import csv
+import time
 import psutil
+from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -34,6 +37,40 @@ class Helper():
             if process.name() == "Broker.exe":
                 return True
         return False
+    
+    # Calculate running time of a function
+    @staticmethod
+    def measure_time(func, *args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        time_delta = int(end-start)
+        hours, remainder = divmod(time_delta, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        print("Elapsed time: {:02} hours {:02} minutes {:02} seconds.".format(int(hours), int(minutes), int(seconds)))
+        return result
+    
+    # Merge all csv files located in a specific folder into one csv file
+    @staticmethod
+    def merge_csv_files(source_folder, output_file_name):
+        csv_files = [f for f in os.listdir(source_folder) if f.endswith('.csv')] # Get a list of all csv files in the specified directory
+        output_file_path = os.path.join(source_folder, output_file_name) # Specify the file to write the merged data
+        # Open the output file in write mode
+        with open(output_file_path, 'w', newline='') as outfile:
+            writer = csv.writer(outfile)
+            # Loop through each csv files
+            for file in csv_files:
+                file_path = os.path.join(source_folder, file)
+                with open(file_path, 'r') as infile:
+                    reader = csv.reader(infile)
+                    for row in reader:
+                        writer.writerow(row) # Write the data from the input file to the output file
+    
+    # Delete file by path
+    @staticmethod
+    def delete_file(file_path):
+        if os.path.isfile(file_path):
+            os.remove(file_path)
 
     
 # For testing purposes only

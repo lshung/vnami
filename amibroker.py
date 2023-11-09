@@ -7,6 +7,8 @@ class AmiBroker():
     app_folder = os.path.dirname(os.path.realpath(__file__))
     database_folder = os.path.join(app_folder, 'database')
     format_file_path = os.path.join(app_folder, 'vnami.format')
+    merged_data_file_name = "All.csv"
+    merged_data_file_path = os.path.join(database_folder, merged_data_file_name)
     amibroker = None
 
     # Get Amibroker instance
@@ -16,25 +18,25 @@ class AmiBroker():
             cls.amibroker = win32com.client.Dispatch("Broker.Application")
         return cls.amibroker
     
-    # Import data of symbols in the database into Amibroker
+    # Merge all csv files into one then import data into Amibroker
     @classmethod
-    def import_data(cls, symbols=[]):
-        if len(symbols) == 0:
-            symbols = [os.path.splitext(file)[0] for file in os.listdir(cls.database_folder)] # Symbols that exist in the database
-        
+    def import_data(cls):
         amibroker = cls.get_amibroker_instance()
         if amibroker is not None:
-            for symbol in symbols:
-                try:
-                    data_file_path = os.path.join(cls.database_folder, f"{symbol}.csv")
-                    amibroker.Import(0, data_file_path, cls.format_file_path)
-                    amibroker.RefreshAll()
-                    print(f"Success: Import data of {symbol} into Amibroker")
-                except Exception as e:
-                    print(f"Error: Cannot import data of {symbol} into Amibroker. Detail: {e}")
+            Helper.delete_file(cls.merged_data_file_path) # Make sure the merged data file is empty
+            try:
+                Helper.merge_csv_files(cls.database_folder, cls.merged_data_file_name)
+                amibroker.Import(0, cls.merged_data_file_path, cls.format_file_path)
+                amibroker.RefreshAll()
+                print(f"Success: Import data into Amibroker")
+            except Exception as e:
+                print(f"Error: Cannot import data into Amibroker. Detail: {e}")
+            Helper.delete_file(cls.merged_data_file_path) # Delete the merged data file after done
+        else:
+            print("Error: Amibroker is not opened")
 
 
 # For testing purposes only
 if __name__ == "__main__":
-    AmiBroker.import_data()
+    Helper.measure_time(AmiBroker.import_data)
     
